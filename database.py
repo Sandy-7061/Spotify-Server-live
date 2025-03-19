@@ -26,7 +26,7 @@ if DATABASE_URL:
 if not DATABASE_URL:
     print("Error: DATABASE_URL environment variable is not set.")
     print("Please set it to your PostgreSQL connection string.")
-    print("Example: postgres://username:password@hostname:port/database?sslmode=require")
+    print("Example: postgresql://username:password@hostname:port/database?sslmode=require")
     
     # In development, fall back to a default value
     if not is_render:
@@ -36,6 +36,11 @@ if not DATABASE_URL:
         print("ERROR: DATABASE_URL environment variable must be set for Render deployment")
         print("Please set it in the Render dashboard under Environment Variables")
         sys.exit(1)
+
+# Fix the dialect name - SQLAlchemy requires 'postgresql://' not 'postgres://'
+if DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    print("Fixed DATABASE_URL dialect from 'postgres://' to 'postgresql://'")
 
 # Create engine with proper SSL settings
 engine = create_engine(DATABASE_URL)
